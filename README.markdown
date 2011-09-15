@@ -22,3 +22,8 @@ placeholder="" - Text to display when nothing is selected.
 sort="alpha" - Sort the values alphabetically. If this is not set, they will be displayed in the order they appear in the database.
 
 site_id="" - On a multi-site installation, the id of the site to use. Defaults to 1.
+
+Installation
+============
+
+Place the vz_picky folder into /system/expressionengine/third_party/. That's it, you're done!
