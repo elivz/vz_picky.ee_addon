@@ -19,6 +19,8 @@ separator="" - You can further break apart each value using this parameter. If a
 
 placeholder="" - Text to display when nothing is selected.
 
+hide_placeholder="yes" - Do not display any placeholder element. Mostly useful for multiple-selects.
+
 sort="alpha" - Sort the values alphabetically. If this is not set, they will be displayed in the order they appear in the database.
 
 site_id="" - On a multi-site installation, the id of the site to use. Defaults to 1.
