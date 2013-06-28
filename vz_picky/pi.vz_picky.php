@@ -11,7 +11,7 @@
 
 $plugin_info = array(
     'pi_name'        => 'VZ Picky',
-    'pi_version'     => '1.1.0',
+    'pi_version'     => '1.1.1',
     'pi_author'      => 'Eli Van Zoeren',
     'pi_author_url'  => 'http://github.com/elivz/vz_picky.ee2_addon',
     'pi_description' => 'Generates an option tag for each unique entry in a particular custom field.',
@@ -92,7 +92,7 @@ class Vz_picky {
         // Sort them
         if ($sort == 'alpha')
         {
-            sort($values);
+            natcasesort($values);
         }
 
         // Construct the markup string
