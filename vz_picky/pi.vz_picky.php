@@ -1,4 +1,4 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
  * VZ Picky Plugin
@@ -11,9 +11,9 @@
 
 $plugin_info = array(
     'pi_name'        => 'VZ Picky',
-    'pi_version'     => '1.1.1',
+    'pi_version'     => '1.2.0',
     'pi_author'      => 'Eli Van Zoeren',
-    'pi_author_url'  => 'http://github.com/elivz/vz_picky.ee2_addon',
+    'pi_author_url'  => 'https://github.com/elivz/vz_picky.ee_addon',
     'pi_description' => 'Generates an option tag for each unique entry in a particular custom field.',
     'pi_usage'       => Vz_picky::usage()
 );
@@ -27,26 +27,20 @@ class Vz_picky {
     */
     public function __construct()
     {
-        $this->EE =& get_instance();
-
         // Store the template parameters
-        $placeholder = $this->EE->TMPL->fetch_param('placeholder', '');
-        $hide_placeholder = $this->EE->TMPL->fetch_param('hide_placeholder');
-        $site_id = $this->EE->TMPL->fetch_param('site_id', '1');
-        $selected = $this->EE->TMPL->fetch_param('value');
-        $sort = $this->EE->TMPL->fetch_param('sort');
-        $sep = $this->EE->TMPL->fetch_param('separator');
-        $field = $this->EE->TMPL->fetch_param('field');
-        if (!$field) return;
+        $field = ee()->TMPL->fetch_param('field');
+        if ( ! $field ) return;
 
-        $output = '';
-        if ($hide_placeholder != 'yes') {
-            $output = '<option value="">'.$placeholder.'</option>';
-        }
+        $placeholder = ee()->TMPL->fetch_param('placeholder', '');
+        $hide_placeholder = ee()->TMPL->fetch_param('hide_placeholder');
+        $site_id = ee()->TMPL->fetch_param('site_id', '1');
+        $selected = ee()->TMPL->fetch_param('value');
+        $sort = ee()->TMPL->fetch_param('sort');
+        $sep = ee()->TMPL->fetch_param('separator');
 
         // Get the field ID
-        $this->EE->db->select('field_id');
-        $query = $this->EE->db->get_where(
+        ee()->db->select('field_id');
+        $query = ee()->db->get_where(
             'exp_channel_fields',
             array(
                 'field_name' => $field,
@@ -54,6 +48,7 @@ class Vz_picky {
             ),
             1
         );
+
         if ($query->num_rows() > 0)
         {
             $row = $query->row();
@@ -61,13 +56,14 @@ class Vz_picky {
         }
         else
         {
-            die("Field was not found");
+            $this->return_data = "Field was not found";
+            return;
         }
 
         // Get all the values from the database
-        $this->EE->db->select($field_column);
-        $this->EE->db->distinct();
-        $query = $this->EE->db->get('exp_channel_data');
+        $query = ee()->db->select($field_column)
+                         ->distinct()
+                         ->get('exp_channel_data');
 
         // Collect the values
         $values = array();
@@ -95,13 +91,42 @@ class Vz_picky {
             natcasesort($values);
         }
 
-        // Construct the markup string
-        foreach ($values as $value)
+        if (ee()->TMPL->tagdata)
         {
-            $output .= ($value == $selected) ? '<option selected="selected">' : '<option>';
-            $output .= $value.'</option>';
+            if (count($values) > 0)
+            {
+                // Put the array in a format parse_variables can use
+                $data = array();
+                foreach ($values as $value)
+                {
+                    $data[] = array('value' => $value);
+                }
+
+                // Parse the template tags
+                $this->return_data = ee()->TMPL->parse_variables(ee()->TMPL->tagdata, $data);
+            }
+            else
+            {
+                // No records were found
+                $this->return_data = ee()->TMPL->no_results();
+            }
         }
-        $this->return_data = $output;
+        else
+        {
+            // Construct the markup string
+            $output = '';
+            if ($hide_placeholder != 'yes') {
+                $output = '<option value="">'.$placeholder.'</option>';
+            }
+
+            foreach ($values as $value)
+            {
+                $output .= ($value == $selected) ? '<option selected="selected">' : '<option>';
+                $output .= $value.'</option>';
+            }
+
+            $this->return_data = $output;
+        }
     }
 
     // --------------------------------------------------------------------
@@ -111,25 +136,43 @@ class Vz_picky {
         ob_start();
     ?>
 
-        VZ Picky will display a dropdown <select> list of all the unique values for a particular custom field. Perfect for advanced search forms!
+VZ Picky will display a dropdown <select> list of all the unique values for a particular custom field. Perfect for advanced search forms! You can also use it as a tag pair to loop through the unique values and generate your own markup.
 
-        Usage:
+USAGE
 
-        {exp:vz_picky field="field_name"}
+Single tag
 
-        field="" - The short name of the custom field to pull values from.
+<select>{exp:vz_picky field="field_name"}</select>
 
-        Optional parameters:
+Outputs a list of <option> elements containing each unique value in the custom field.
 
-        value="" - Value to pre-select.
+Tag pair
 
-        separator="" - You can further break apart each value using this parameter. If a field contains a comma-separated list of tags, for instance, this will list each tag as its own <option>.
+{exp:vz_picky field="field_name"}
+  {value}<br/>
+{/exp:vz_picky}
 
-        placeholder="" - Text to display when nothing is selected.
+Loops through each unique value in the field.
 
-        sort="alpha" - Sort the values alphabetically. If this is not set, they will be displayed in the order they appear in the database.
+REQUIRED PARAMETER
 
-        site_id="" - On a multi-site installation, the id of the site to use. Defaults to 1.
+field - The short name of the custom field to pull values from.
+
+OPTIONAL PARAMETERS
+
+separator - You can further break apart each value using this parameter. If a field contains a comma-separated list of tags, for instance, this will list each tag as its own option
+
+sort="alpha" - Sort the values alphabetically. If this is not set, they will be displayed in the order they appear in the database.
+
+site_id - On a multi-site installation, the id of the site to use. Defaults to 1.
+
+The following parameters only apply to the single-tag usage:
+
+value - Value to pre-select.
+
+placeholder - Text to display when nothing is selected.
+
+hide_placeholder="yes" - Do not display any placeholder element. Mostly useful for multiple-selects.
 
     <?php
         $buffer = ob_get_contents();
