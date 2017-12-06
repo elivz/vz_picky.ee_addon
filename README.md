@@ -1,7 +1,7 @@
 VZ Picky
 ========
 
-VZ Picky will display a dropdown <select> list of all the unique values for a particular custom field. Perfect for advanced search forms! You can also use it as a tag pair to loop through the unique values and generate your own markup.
+VZ Picky will display a dropdown `<select>` list of all the unique values for a particular custom field. Perfect for advanced search forms! You can also use it as a tag pair to loop through the unique values and generate your own markup.
 
 Usage
 -----
@@ -34,9 +34,11 @@ Optional parameters
 
 `sort="alpha"` - Sort the values alphabetically. If this is not set, they will be displayed in the order they appear in the database.
 
+`status` - Only use values from entries with a particular status (or statuses). Uses the [same syntax as the channel:entries tag](https://docs.expressionengine.com/v2/add-ons/channel/channel_entries.html#status). Defaults to `open`.
+
 `site_id` - On a multi-site installation, the id of the site to use. Defaults to 1.
 
-#### The following parameters only apply to the single-tag usage:
+### The following parameters only apply to the single-tag usage:
 
 `value` - Value to pre-select.
 
