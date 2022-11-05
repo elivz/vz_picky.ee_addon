@@ -13,6 +13,6 @@ return array(
     'author_url'  => 'http://elivz.com',
     'name'        => 'VZ Picky',
     'description' => 'Generates an option tag for each unique entry in a particular custom field.',
-    'version'     => '1.3.0',
+    'version'     => '2.0.0',
     'namespace'   => 'Vz\Picky'
 );

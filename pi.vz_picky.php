@@ -10,17 +10,6 @@
  * @link        http://elivz.com
  */
 
-
-$plugin_info = array(
-    'pi_name'        => 'VZ Picky',
-    'pi_version'     => '1.3.0',
-    'pi_author'      => 'Eli Van Zoeren',
-    'pi_author_url'  => 'https://github.com/elivz/vz_picky.ee_addon',
-    'pi_description' => 'Generates an option tag for each unique entry in a particular custom field.',
-    'pi_usage'       => Vz_picky::usage()
-);
-
-
 class Vz_picky
 {
     /**
@@ -50,27 +39,17 @@ class Vz_picky
         $sep = ee()->TMPL->fetch_param('separator');
 
         // Get the field ID
-        ee()->db->select('field_id');
-        $query = ee()->db->get_where(
-            'exp_channel_fields',
-            array(
-                'field_name' => $field,
-                'site_id' => $site_id,
-            ),
-            1
-        );
+        $field = ee('Model')->get('ChannelField')->filter('field_name', $field)->first();
 
-        if ($query->num_rows() > 0)
-        {
-            $row = $query->row();
-            $field_column = 'field_id_'.$row->field_id;
-        }
-        else
+        if ( ! $field)
         {
             $this->return_data = '';
             return;
         }
 
+        $field_column = 'field_id_'.$field->getId();
+        $field_table_name = $field->getTableName();
+        
         // Handle status parameter
         if ($status)
         {
@@ -94,7 +73,7 @@ class Vz_picky
         ee()->db->select($field_column);
         ee()->db->distinct();
         ee()->db->from('exp_channel_titles');
-        ee()->db->join('exp_channel_data', 'exp_channel_data.entry_id = exp_channel_titles.entry_id');
+        ee()->db->join($field_table_name, $field_table_name.'.entry_id = exp_channel_titles.entry_id');
         ee()->db->where($status, NULL, FALSE);
 
         $result = ee()->db->get();
@@ -159,7 +138,7 @@ class Vz_picky
                 $output .= strip_tags($value);
                 $output .= '</option>';
             }
-            print($output); die();
+            //print($output); die();
 
             $this->return_data = $output;
         }
